@@ -17,6 +17,7 @@
 ## Etapa 3 - Banco de vagas e ranking diario
 
 - Gerar links de busca por cargo, localidade, modalidade e skills. Concluido na base inicial.
+- Importar rascunho de vaga por URL/HTML para revisao humana. Concluido na base inicial.
 - Salvar vagas analisadas. Concluido na base inicial.
 - Salvar perfis, candidaturas e PDFs gerados. Concluido na base inicial.
 - Detectar duplicatas.

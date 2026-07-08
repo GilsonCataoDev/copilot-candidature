@@ -102,6 +102,30 @@ def test_job_search_links_endpoint(client: TestClient) -> None:
     assert any(search["provider"] == "linkedin" for search in searches)
 
 
+def test_job_import_draft_endpoint(client: TestClient) -> None:
+    response = client.post(
+        "/job-import/draft",
+        json={
+            "url": "https://example.com/jobs/1",
+            "html": """
+                <html>
+                  <head>
+                    <title>Analista de Dados - Acme</title>
+                    <meta name="description" content="Vaga com Python, SQL e Power BI." />
+                  </head>
+                </html>
+            """,
+            "fallback_location": "Remoto",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["job"]["title"] == "Analista de Dados"
+    assert body["job"]["company"] == "Acme"
+    assert body["job"]["required_skills"] == ["Python", "SQL", "Power BI"]
+
+
 def test_profile_job_and_application_flow(client: TestClient) -> None:
     payload = sample_payload()
     profile_response = client.post("/profiles", json=payload["profile"])

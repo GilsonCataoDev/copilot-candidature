@@ -30,6 +30,23 @@ O retorno traz uma lista de URLs prontas para abrir no navegador.
 
 O usuario cola um link de vaga. O sistema tenta extrair titulo, empresa, descricao, localidade e skills provaveis. Antes de salvar, o usuario revisa.
 
+Endpoint:
+
+```http
+POST /job-import/draft
+```
+
+Exemplo de payload:
+
+```json
+{
+  "url": "https://example.com/jobs/123",
+  "fallback_location": "Remoto"
+}
+```
+
+O endpoint tambem aceita `html` no payload para testes, extensoes de navegador ou fluxos onde a pagina ja foi aberta pelo usuario.
+
 ## Nivel 3 - Navegador semi-automatico
 
 Com Playwright, o sistema pode abrir paginas, preencher campos simples e preparar candidaturas. O envio final deve continuar com confirmacao humana.
@@ -41,4 +58,3 @@ Esse nivel precisa respeitar:
 - Limite diario configuravel.
 - Registro do que foi enviado.
 - Revisao do CV e da mensagem antes da candidatura.
-

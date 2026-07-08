@@ -149,3 +149,16 @@ class JobSearchLink(BaseModel):
 
 class JobSearchPlan(BaseModel):
     searches: list[JobSearchLink]
+
+
+class JobImportRequest(BaseModel):
+    url: HttpUrl
+    html: str | None = None
+    fallback_company: str | None = None
+    fallback_location: str | None = None
+
+
+class JobImportDraft(BaseModel):
+    job: JobPosting
+    extracted_skills: list[str]
+    review_notes: list[str]

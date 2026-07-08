@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from app.config import get_settings
 from app.cv_pdf import generate_cv_pdf
 from app.database import Database
+from app.job_import import import_job_draft
 from app.job_search import build_search_plan
 from app.matching import analyze_match
 from app.models import (
@@ -14,6 +15,8 @@ from app.models import (
     CvGenerationRequest,
     CvGenerationResponse,
     JobPosting,
+    JobImportDraft,
+    JobImportRequest,
     JobRecommendation,
     JobSearchPlan,
     JobSearchRequest,
@@ -62,6 +65,14 @@ def create_cv(request: CvGenerationRequest) -> CvGenerationResponse:
 @app.post("/job-search/links", response_model=JobSearchPlan)
 def create_job_search_links(request: JobSearchRequest) -> JobSearchPlan:
     return build_search_plan(request)
+
+
+@app.post("/job-import/draft", response_model=JobImportDraft)
+def create_job_import_draft(request: JobImportRequest) -> JobImportDraft:
+    try:
+        return import_job_draft(request)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
 
 
 @app.post("/profiles", response_model=StoredProfile, status_code=201)

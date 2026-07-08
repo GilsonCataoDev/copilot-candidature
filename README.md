@@ -34,6 +34,7 @@ Depois acesse:
 - `POST /match`
 - `POST /cv`
 - `POST /job-search/links`
+- `POST /job-import/draft`
 - `POST /profiles`
 - `GET /profiles`
 - `POST /jobs`
