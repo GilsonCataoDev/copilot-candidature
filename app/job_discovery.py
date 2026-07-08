@@ -11,6 +11,15 @@ from app.models import DiscoveredJob, JobPosting, UserProfile
 
 REMOTIVE_ENDPOINT = "https://remotive.com/api/remote-jobs"
 GOOGLE_SEARCH_ENDPOINT = "https://www.googleapis.com/customsearch/v1"
+TERM_EXPANSIONS = {
+    "estagio": ["internship", "intern", "junior"],
+    "estágio": ["internship", "intern", "junior"],
+    "dados": ["data analyst", "data science", "business intelligence"],
+    "analista": ["analyst"],
+    "desenvolvedor": ["developer", "software engineer"],
+    "backend": ["backend developer", "python developer"],
+    "frontend": ["frontend developer", "react developer"],
+}
 
 
 def strip_html(value: str) -> str:
@@ -28,12 +37,20 @@ def strip_html(value: str) -> str:
 
 
 def search_terms_for_profile(profile: UserProfile) -> list[str]:
-    terms = profile.target_roles[:3]
-    if not terms and profile.skills:
-        terms = profile.skills[:3]
-    if not terms:
-        terms = ["python", "data", "developer"]
-    return terms
+    terms = [*profile.target_roles, *profile.skills[:6]]
+    expanded_terms = []
+    for term in terms:
+        clean_term = term.strip()
+        if not clean_term:
+            continue
+        expanded_terms.append(clean_term)
+        normalized = clean_term.casefold()
+        for trigger, expansions in TERM_EXPANSIONS.items():
+            if trigger in normalized:
+                expanded_terms.extend(expansions)
+    if not expanded_terms:
+        expanded_terms = ["python", "data analyst", "developer", "internship"]
+    return list(dict.fromkeys(expanded_terms))[:8]
 
 
 def google_queries_for_profile(profile: UserProfile) -> list[str]:
@@ -149,23 +166,35 @@ def discover_remotive_jobs(
     minimum_score: int = 50,
 ) -> list[DiscoveredJob]:
     discovered: dict[str, DiscoveredJob] = {}
+    candidates: dict[str, DiscoveredJob] = {}
 
     for term in search_terms_for_profile(profile):
         for raw_job in fetch_remotive_jobs(term, limit_per_term):
             source_id = str(raw_job.get("id"))
-            if source_id in discovered or not is_recent(raw_job, max_age_days):
+            if source_id in candidates or not is_recent(raw_job, max_age_days):
                 continue
             job = map_remotive_job(raw_job)
             match = analyze_match(profile, job)
-            if match.score < minimum_score:
-                continue
-            discovered[source_id] = DiscoveredJob(
+            candidate = DiscoveredJob(
                 source="remotive",
                 source_id=source_id,
                 job=job,
                 match=match,
                 published_at=raw_job.get("publication_date"),
             )
+            candidates[source_id] = candidate
+            if match.score < minimum_score:
+                continue
+            discovered[source_id] = candidate
+
+    if not discovered:
+        discovered = dict(
+            sorted(
+                candidates.items(),
+                key=lambda item: (item[1].match.score, item[1].published_at or ""),
+                reverse=True,
+            )[:10]
+        )
 
     return sorted(
         discovered.values(),
