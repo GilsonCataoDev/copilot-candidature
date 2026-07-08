@@ -22,6 +22,19 @@ function setStatus(message, isError = false) {
   statusMessage.classList.toggle("error", isError);
 }
 
+function errorMessage(body, fallback) {
+  if (typeof body.detail === "string") {
+    return body.detail;
+  }
+  if (Array.isArray(body.detail)) {
+    return body.detail.map((item) => item.msg || JSON.stringify(item)).join(" ");
+  }
+  if (body.detail) {
+    return JSON.stringify(body.detail);
+  }
+  return fallback;
+}
+
 async function api(path, options = {}) {
   const response = await fetch(path, {
     headers: {
@@ -33,7 +46,7 @@ async function api(path, options = {}) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body.detail || `Erro HTTP ${response.status}`);
+    throw new Error(errorMessage(body, `Erro HTTP ${response.status}`));
   }
 
   return response.json();
@@ -47,7 +60,7 @@ async function apiForm(path, formData) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body.detail || `Erro HTTP ${response.status}`);
+    throw new Error(errorMessage(body, `Erro HTTP ${response.status}`));
   }
 
   return response.json();

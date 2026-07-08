@@ -72,6 +72,7 @@ def test_dashboard_endpoint(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert "Copilot Candidature" in response.text
+    assert 'name="file"' in response.text
 
 
 def test_match_endpoint(client: TestClient) -> None:
