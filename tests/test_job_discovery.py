@@ -1,4 +1,4 @@
-from app.job_discovery import discover_google_jobs, discover_jobs, discover_remotive_jobs
+from app.job_discovery import discover_google_jobs, discover_jobs, discover_remotive_jobs, is_recent
 from app.models import UserProfile, WorkMode
 
 
@@ -76,3 +76,7 @@ def test_discover_jobs_combines_sources(monkeypatch) -> None:
     jobs = discover_jobs(profile, google_api_key=None, google_search_engine_id=None)
 
     assert jobs == []
+
+
+def test_is_recent_accepts_naive_publication_dates() -> None:
+    assert is_recent({"publication_date": "2026-07-08T10:00:00"}, max_age_days=1)

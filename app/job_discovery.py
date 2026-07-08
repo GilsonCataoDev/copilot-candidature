@@ -137,6 +137,8 @@ def is_recent(raw_job: dict, max_age_days: int) -> bool:
     if not publication_date:
         return True
     parsed = datetime.fromisoformat(publication_date.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
     return parsed >= datetime.now(UTC) - timedelta(days=max_age_days)
 
 
