@@ -26,7 +26,7 @@
 
 ## Etapa 4 - Revisao humana e candidatura assistida
 
-- Painel de aprovacao.
+- Painel de aprovacao. Base iniciada com interface web em `/`.
 - Mensagem personalizada para cada vaga.
 - Checklist antes do envio.
 - Registro de status da candidatura. Base iniciada com atualizacao de status.

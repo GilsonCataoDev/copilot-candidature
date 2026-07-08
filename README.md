@@ -25,11 +25,12 @@ uvicorn app.main:app --reload
 
 Depois acesse:
 
-- API: http://127.0.0.1:8000
+- Painel: http://127.0.0.1:8000
 - Docs: http://127.0.0.1:8000/docs
 
 ## Endpoints iniciais
 
+- `GET /`
 - `GET /health`
 - `POST /match`
 - `POST /cv`
@@ -47,6 +48,18 @@ Depois acesse:
 ## Busca no navegador
 
 A estrategia inicial esta documentada em `docs/BROWSER_SEARCH.md`: primeiro o sistema gera links de busca e importa vagas revisadas pelo usuario; depois evolui para navegador semi-automatico com Playwright e confirmacao humana.
+
+## Painel web
+
+O painel em `/` permite:
+
+- cadastrar perfil;
+- gerar links de busca;
+- importar rascunho de vaga;
+- salvar vagas;
+- ver ranking por perfil;
+- criar candidatura com CV PDF;
+- aprovar candidatura.
 
 ## Testes
 

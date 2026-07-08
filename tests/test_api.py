@@ -67,6 +67,13 @@ def test_health_endpoint(client: TestClient) -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_dashboard_endpoint(client: TestClient) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Copilot Candidature" in response.text
+
+
 def test_match_endpoint(client: TestClient) -> None:
     response = client.post("/match", json=sample_payload())
 

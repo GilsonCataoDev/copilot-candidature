@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Copilot Candidature</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar">
+        <div>
+          <h1>Copilot Candidature</h1>
+          <p>Perfil, busca, importacao de vagas e fila de candidatura em um fluxo unico.</p>
+        </div>
+        <button id="refreshButton" type="button">Atualizar dados</button>
+      </section>
+
+      <section class="grid two-columns">
+        <form id="profileForm" class="panel">
+          <h2>Perfil</h2>
+          <label>
+            Nome
+            <input name="full_name" required placeholder="Ana Silva" />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" required placeholder="ana@email.com" />
+          </label>
+          <label>
+            Localidade
+            <input name="location" placeholder="Sao Paulo, SP" />
+          </label>
+          <label>
+            Resumo
+            <textarea name="summary" rows="4" placeholder="Estudante com projetos em dados..."></textarea>
+          </label>
+          <label>
+            Skills
+            <input name="skills" placeholder="Python, SQL, Excel" />
+          </label>
+          <label>
+            Cargos alvo
+            <input name="target_roles" placeholder="Estagio em dados, Backend Python" />
+          </label>
+          <div class="inline-options">
+            <label><input name="preferred_work_modes" type="checkbox" value="remote" /> Remoto</label>
+            <label><input name="preferred_work_modes" type="checkbox" value="hybrid" /> Hibrido</label>
+            <label><input name="preferred_work_modes" type="checkbox" value="onsite" /> Presencial</label>
+          </div>
+          <button type="submit">Salvar perfil</button>
+        </form>
+
+        <section class="panel">
+          <h2>Buscar vagas</h2>
+          <form id="searchForm">
+            <label>
+              Cargo
+              <input name="role" required placeholder="Desenvolvedor Python" />
+            </label>
+            <label>
+              Local
+              <input name="location" placeholder="Sao Paulo" />
+            </label>
+            <label>
+              Skills
+              <input name="skills" placeholder="FastAPI, SQL" />
+            </label>
+            <div class="inline-options">
+              <label><input name="remote" type="checkbox" /> Remoto</label>
+              <label><input name="internship" type="checkbox" /> Estagio</label>
+            </div>
+            <button type="submit">Gerar links</button>
+          </form>
+          <div id="searchLinks" class="stack"></div>
+        </section>
+      </section>
+
+      <section class="grid two-columns">
+        <section class="panel">
+          <h2>Importar vaga</h2>
+          <form id="importForm">
+            <label>
+              URL da vaga
+              <input name="url" type="url" required placeholder="https://..." />
+            </label>
+            <label>
+              Localidade fallback
+              <input name="fallback_location" placeholder="Remoto" />
+            </label>
+            <label>
+              HTML opcional
+              <textarea name="html" rows="5" placeholder="Cole HTML aqui para testar sem acessar a URL"></textarea>
+            </label>
+            <button type="submit">Gerar rascunho</button>
+          </form>
+          <div id="importDraft" class="stack"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Dados salvos</h2>
+          <div class="split">
+            <div>
+              <h3>Perfis</h3>
+              <select id="profileSelect"></select>
+            </div>
+            <div>
+              <h3>Vagas</h3>
+              <div id="jobsList" class="compact-list"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="grid two-columns">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Ranking</h2>
+            <button id="recommendButton" type="button">Ver recomendacoes</button>
+          </div>
+          <div id="recommendations" class="stack"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Candidaturas</h2>
+          <div id="applications" class="stack"></div>
+        </section>
+      </section>
+
+      <p id="statusMessage" class="status" role="status"></p>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

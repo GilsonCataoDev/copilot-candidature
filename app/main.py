@@ -1,7 +1,10 @@
 from collections.abc import Iterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.cv_pdf import generate_cv_pdf
@@ -30,6 +33,7 @@ from app.models import (
 
 settings = get_settings()
 database = Database(settings.database_path)
+static_dir = Path(__file__).parent / "static"
 
 
 @asynccontextmanager
@@ -39,10 +43,16 @@ async def lifespan(_: FastAPI) -> Iterator[None]:
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 def get_database() -> Iterator[Database]:
     yield database
+
+
+@app.get("/", include_in_schema=False)
+def dashboard() -> FileResponse:
+    return FileResponse(static_dir / "index.html")
 
 
 @app.get("/health")
