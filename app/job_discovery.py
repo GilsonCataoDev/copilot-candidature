@@ -14,6 +14,10 @@ GOOGLE_SEARCH_ENDPOINT = "https://www.googleapis.com/customsearch/v1"
 TERM_EXPANSIONS = {
     "estagio": ["internship", "intern", "junior"],
     "estágio": ["internship", "intern", "junior"],
+    "service desk": ["service desk", "help desk", "IT support", "technical support"],
+    "help desk": ["help desk", "service desk", "IT support", "technical support"],
+    "suporte": ["IT support", "technical support", "support analyst", "help desk"],
+    "atendimento": ["customer support", "technical support", "support specialist"],
     "dados": ["data analyst", "data science", "business intelligence"],
     "analista": ["analyst"],
     "desenvolvedor": ["developer", "software engineer"],
@@ -50,7 +54,16 @@ def search_terms_for_profile(profile: UserProfile) -> list[str]:
                 expanded_terms.extend(expansions)
     if not expanded_terms:
         expanded_terms = ["python", "data analyst", "developer", "internship"]
-    return list(dict.fromkeys(expanded_terms))[:8]
+
+    deduped_terms = []
+    seen = set()
+    for term in expanded_terms:
+        normalized = term.casefold()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped_terms.append(term)
+    return deduped_terms[:10]
 
 
 def google_queries_for_profile(profile: UserProfile) -> list[str]:

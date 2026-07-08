@@ -4,7 +4,7 @@ from io import BytesIO
 from pypdf import PdfReader
 
 from app.job_import import KNOWN_SKILLS, extract_skills
-from app.models import CvProfileDraft, UserProfile
+from app.models import CvProfileDraft, UserProfile, WorkMode
 
 
 EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
@@ -26,6 +26,17 @@ def extract_text_from_upload(filename: str, content: bytes) -> str:
 def infer_target_roles(text: str) -> list[str]:
     normalized = text.casefold()
     roles = []
+    if any(
+        term in normalized
+        for term in [
+            "service desk",
+            "help desk",
+            "suporte de ti",
+            "atendimento ao usuário",
+            "atendimento a usuários",
+        ]
+    ):
+        roles.extend(["Service Desk", "Suporte de TI", "Help Desk", "IT Support"])
     if any(skill.casefold() in normalized for skill in ["python", "sql", "power bi", "excel"]):
         roles.append("Analista de Dados")
     if any(skill.casefold() in normalized for skill in ["python", "fastapi", "django", "node.js"]):
@@ -35,6 +46,18 @@ def infer_target_roles(text: str) -> list[str]:
     if "estagio" in normalized or "estágio" in normalized:
         roles.insert(0, "Estagio")
     return list(dict.fromkeys(roles))
+
+
+def infer_work_modes(text: str) -> list[WorkMode]:
+    normalized = text.casefold()
+    modes = []
+    if "remoto" in normalized or "remote" in normalized:
+        modes.append(WorkMode.remote)
+    if "híbrido" in normalized or "hibrido" in normalized or "hybrid" in normalized:
+        modes.append(WorkMode.hybrid)
+    if "presencial" in normalized or "onsite" in normalized:
+        modes.append(WorkMode.onsite)
+    return modes
 
 
 def build_profile_draft_from_cv(filename: str, content: bytes) -> CvProfileDraft:
@@ -66,6 +89,7 @@ def build_profile_draft_from_cv(filename: str, content: bytes) -> CvProfileDraft
         summary=" ".join(lines[1:6])[:600] if len(lines) > 1 else None,
         skills=extracted_skills,
         target_roles=target_roles,
+        preferred_work_modes=infer_work_modes(text),
     )
     return CvProfileDraft(
         profile=profile,

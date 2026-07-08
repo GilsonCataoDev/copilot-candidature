@@ -1,3 +1,4 @@
+import re
 from html.parser import HTMLParser
 from urllib.error import URLError
 from urllib.request import Request, urlopen
@@ -6,6 +7,24 @@ from app.models import JobImportDraft, JobImportRequest, JobPosting
 
 
 KNOWN_SKILLS = [
+    "Service Desk",
+    "Help Desk",
+    "Suporte de TI",
+    "IT Support",
+    "Technical Support",
+    "Atendimento ao usuário",
+    "Documentação de processos",
+    "Base de conhecimento",
+    "Análise de causa raiz",
+    "Governança",
+    "Conformidade",
+    "LGPD",
+    "CRUD",
+    "API",
+    "APIs",
+    "Vercel",
+    "Monitoramento",
+    "Incidentes",
     "Python",
     "JavaScript",
     "TypeScript",
@@ -19,6 +38,7 @@ KNOWN_SKILLS = [
     "Excel",
     "Power BI",
     "Git",
+    "GitHub",
     "Docker",
     "AWS",
     "Azure",
@@ -92,8 +112,11 @@ def split_title_company(raw_title: str) -> tuple[str, str | None]:
 
 
 def extract_skills(text: str) -> list[str]:
-    normalized = text.casefold()
-    return [skill for skill in KNOWN_SKILLS if skill.casefold() in normalized]
+    return [
+        skill
+        for skill in KNOWN_SKILLS
+        if re.search(rf"(?<!\w){re.escape(skill)}(?!\w)", text, flags=re.IGNORECASE)
+    ]
 
 
 def infer_contract_type(text: str) -> str:

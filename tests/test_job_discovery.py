@@ -65,6 +65,22 @@ def test_search_terms_expand_portuguese_profile_terms() -> None:
     assert "Python" in terms
 
 
+def test_search_terms_expand_service_desk_terms() -> None:
+    profile = UserProfile(
+        full_name="Gilson Nascimento",
+        email="gilson@example.com",
+        skills=["Atendimento ao usuário", "Python"],
+        target_roles=["Suporte de TI"],
+    )
+
+    terms = search_terms_for_profile(profile)
+
+    assert "Suporte de TI" in terms
+    assert "IT support" in terms
+    assert "technical support" in terms
+    assert "support analyst" in terms
+
+
 def test_discover_remotive_jobs_returns_candidates_when_minimum_score_filters_all(
     monkeypatch,
 ) -> None:
