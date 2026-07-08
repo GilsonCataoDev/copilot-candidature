@@ -34,6 +34,7 @@ Depois acesse:
 - `GET /health`
 - `POST /match`
 - `POST /cv`
+- `POST /cv-import/profile-draft`
 - `POST /job-search/links`
 - `POST /job-import/draft`
 - `POST /profiles`
@@ -41,6 +42,7 @@ Depois acesse:
 - `POST /jobs`
 - `GET /jobs`
 - `GET /profiles/{profile_id}/recommendations`
+- `POST /profiles/{profile_id}/discover-jobs`
 - `POST /applications`
 - `GET /applications`
 - `PATCH /applications/{application_id}/status`
@@ -54,7 +56,9 @@ A estrategia inicial esta documentada em `docs/BROWSER_SEARCH.md`: primeiro o si
 O painel em `/` permite:
 
 - cadastrar perfil;
+- importar perfil a partir de CV PDF/TXT;
 - gerar links de busca;
+- procurar vagas recentes na Remotive;
 - importar rascunho de vaga;
 - salvar vagas;
 - ver ranking por perfil;

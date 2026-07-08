@@ -133,6 +133,24 @@ def test_job_import_draft_endpoint(client: TestClient) -> None:
     assert body["job"]["required_skills"] == ["Python", "SQL", "Power BI"]
 
 
+def test_cv_import_profile_draft_endpoint(client: TestClient) -> None:
+    response = client.post(
+        "/cv-import/profile-draft",
+        files={
+            "file": (
+                "cv.txt",
+                b"Ana Silva\nana@example.com\nPython SQL FastAPI",
+                "text/plain",
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["profile"]["full_name"] == "Ana Silva"
+    assert body["extracted_skills"] == ["Python", "FastAPI", "SQL"]
+
+
 def test_profile_job_and_application_flow(client: TestClient) -> None:
     payload = sample_payload()
     profile_response = client.post("/profiles", json=payload["profile"])

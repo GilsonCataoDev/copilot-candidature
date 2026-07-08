@@ -26,6 +26,25 @@ Exemplo de payload:
 
 O retorno traz uma lista de URLs prontas para abrir no navegador.
 
+## Descoberta automatica controlada
+
+O sistema tambem consegue buscar vagas recentes na API publica da Remotive, comparar com um perfil salvo e listar as melhores oportunidades.
+
+Endpoint:
+
+```http
+POST /profiles/{profile_id}/discover-jobs
+```
+
+Parametros uteis:
+
+- `limit_per_term`: quantidade maxima por termo de busca.
+- `max_age_days`: idade maxima da vaga.
+- `minimum_score`: match minimo para entrar na lista.
+- `save_top`: quantidade de vagas melhores que devem ser salvas automaticamente no banco.
+
+A Remotive orienta evitar chamadas frequentes demais; para este MVP, use a busca algumas vezes por dia e sempre mantenha o link de origem para a vaga.
+
 ## Nivel 2 - Importacao guiada
 
 O usuario cola um link de vaga. O sistema tenta extrair titulo, empresa, descricao, localidade e skills provaveis. Antes de salvar, o usuario revisa.

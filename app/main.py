@@ -2,21 +2,25 @@ from collections.abc import Iterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
+from app.cv_import import build_profile_draft_from_cv
 from app.cv_pdf import generate_cv_pdf
 from app.database import Database
+from app.job_discovery import discover_remotive_jobs
 from app.job_import import import_job_draft
 from app.job_search import build_search_plan
 from app.matching import analyze_match
 from app.models import (
     ApplicationRecord,
     CreateApplicationRequest,
+    CvProfileDraft,
     CvGenerationRequest,
     CvGenerationResponse,
+    JobDiscoveryResponse,
     JobPosting,
     JobImportDraft,
     JobImportRequest,
@@ -85,6 +89,12 @@ def create_job_import_draft(request: JobImportRequest) -> JobImportDraft:
         raise HTTPException(status_code=422, detail=str(error)) from error
 
 
+@app.post("/cv-import/profile-draft", response_model=CvProfileDraft)
+async def create_profile_draft_from_cv(file: UploadFile = File(...)) -> CvProfileDraft:
+    content = await file.read()
+    return build_profile_draft_from_cv(file.filename or "cv.txt", content)
+
+
 @app.post("/profiles", response_model=StoredProfile, status_code=201)
 def create_profile(profile: UserProfile, db: Database = Depends(get_database)) -> StoredProfile:
     return db.create_profile(profile)
@@ -146,6 +156,39 @@ def recommend_jobs(
         if recommendation.match.score >= minimum_score
     ]
     return sorted(qualified, key=lambda recommendation: recommendation.match.score, reverse=True)[:limit]
+
+
+@app.post("/profiles/{profile_id}/discover-jobs", response_model=JobDiscoveryResponse)
+def discover_jobs_for_profile(
+    profile_id: int,
+    limit_per_term: int = 10,
+    max_age_days: int = 14,
+    minimum_score: int = 50,
+    save_top: int = 0,
+    db: Database = Depends(get_database),
+) -> JobDiscoveryResponse:
+    stored_profile = db.get_profile(profile_id)
+    if stored_profile is None:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    discovered_jobs = discover_remotive_jobs(
+        stored_profile.profile,
+        limit_per_term=limit_per_term,
+        max_age_days=max_age_days,
+        minimum_score=minimum_score,
+    )
+
+    imported_count = 0
+    for discovered in discovered_jobs[: max(0, save_top)]:
+        db.create_job(discovered.job)
+        imported_count += 1
+
+    return JobDiscoveryResponse(
+        profile_id=profile_id,
+        source="remotive",
+        imported_count=imported_count,
+        jobs=discovered_jobs,
+    )
 
 
 @app.post("/applications", response_model=ApplicationRecord, status_code=201)

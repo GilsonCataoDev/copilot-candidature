@@ -4,6 +4,7 @@
 
 - Estruturar API.
 - Definir modelo de perfil do usuario.
+- Importar rascunho de perfil a partir de CV PDF/TXT. Base iniciada.
 - Definir modelo de vaga.
 - Calcular compatibilidade inicial.
 - Gerar CV PDF simples.
@@ -17,6 +18,7 @@
 ## Etapa 3 - Banco de vagas e ranking diario
 
 - Gerar links de busca por cargo, localidade, modalidade e skills. Concluido na base inicial.
+- Buscar vagas recentes por API publica e ranquear por perfil. Base iniciada com Remotive.
 - Importar rascunho de vaga por URL/HTML para revisao humana. Concluido na base inicial.
 - Salvar vagas analisadas. Concluido na base inicial.
 - Salvar perfis, candidaturas e PDFs gerados. Concluido na base inicial.

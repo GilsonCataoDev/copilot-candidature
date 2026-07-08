@@ -162,3 +162,24 @@ class JobImportDraft(BaseModel):
     job: JobPosting
     extracted_skills: list[str]
     review_notes: list[str]
+
+
+class DiscoveredJob(BaseModel):
+    source: str
+    source_id: str
+    job: JobPosting
+    match: MatchResult
+    published_at: str | None = None
+
+
+class JobDiscoveryResponse(BaseModel):
+    profile_id: int
+    source: str
+    imported_count: int
+    jobs: list[DiscoveredJob]
+
+
+class CvProfileDraft(BaseModel):
+    profile: UserProfile
+    extracted_skills: list[str]
+    review_notes: list[str]

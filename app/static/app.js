@@ -39,6 +39,20 @@ async function api(path, options = {}) {
   return response.json();
 }
 
+async function apiForm(path, formData) {
+  const response = await fetch(path, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.detail || `Erro HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
 function renderProfiles() {
   const select = document.querySelector("#profileSelect");
   select.innerHTML = state.profiles
@@ -130,6 +144,35 @@ document.querySelector("#profileForm").addEventListener("submit", async (event) 
   form.reset();
   setStatus("Perfil salvo.");
   await loadData();
+});
+
+document.querySelector("#cvUploadForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  const draft = await apiForm("/cv-import/profile-draft", data);
+
+  document.querySelector("#cvDraft").innerHTML = `
+    <article class="card">
+      <h3>${draft.profile.full_name}</h3>
+      <p class="meta">${draft.profile.email}</p>
+      <p>${draft.profile.summary || ""}</p>
+      <p class="meta">Skills: ${draft.extracted_skills.join(", ") || "revisar manualmente"}</p>
+      <p class="meta">Cargos: ${draft.profile.target_roles.join(", ") || "revisar manualmente"}</p>
+      ${
+        draft.review_notes.length
+          ? `<p class="meta">Revisar: ${draft.review_notes.join(" ")}</p>`
+          : ""
+      }
+      <button id="saveCvProfile" type="button">Salvar perfil importado</button>
+    </article>
+  `;
+
+  document.querySelector("#saveCvProfile").addEventListener("click", async () => {
+    await api("/profiles", { method: "POST", body: JSON.stringify(draft.profile) });
+    setStatus("Perfil importado do CV.");
+    await loadData();
+  });
 });
 
 document.querySelector("#searchForm").addEventListener("submit", async (event) => {
@@ -239,6 +282,45 @@ document.querySelector("#recommendButton").addEventListener("click", async () =>
       await loadData();
     });
   });
+});
+
+document.querySelector("#discoverButton").addEventListener("click", async () => {
+  const profileId = document.querySelector("#profileSelect").value;
+  if (!profileId) {
+    setStatus("Salve um perfil antes de procurar vagas recentes.", true);
+    return;
+  }
+
+  const saveTop = Number(document.querySelector("#saveTopInput").value || 0);
+  setStatus("Procurando vagas recentes na Remotive...");
+  const result = await api(
+    `/profiles/${profileId}/discover-jobs?limit_per_term=10&max_age_days=14&minimum_score=40&save_top=${saveTop}`,
+    { method: "POST" },
+  );
+
+  const target = document.querySelector("#recommendations");
+  if (!result.jobs.length) {
+    target.innerHTML = '<p class="meta">Nenhuma vaga recente compativel encontrada.</p>';
+    setStatus("Busca concluida sem vagas compatíveis.");
+    return;
+  }
+
+  target.innerHTML = result.jobs
+    .map(
+      (item) => `
+        <article class="card">
+          <h3>${item.job.title}</h3>
+          <p class="meta">${item.job.company} - ${item.job.location || "Remote"}</p>
+          <p><span class="score">${item.match.score}% match</span> Fonte: ${item.source}</p>
+          <p class="meta">Publicado: ${item.published_at || "nao informado"}</p>
+          <a href="${item.job.url}" target="_blank" rel="noreferrer">Abrir vaga na Remotive</a>
+        </article>
+      `,
+    )
+    .join("");
+
+  setStatus(`${result.jobs.length} vagas encontradas. ${result.imported_count} importadas.`);
+  await loadData();
 });
 
 document.querySelector("#refreshButton").addEventListener("click", async () => {

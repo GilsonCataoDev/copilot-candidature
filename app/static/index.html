@@ -52,6 +52,20 @@
         </form>
 
         <section class="panel">
+          <h2>Importar CV</h2>
+          <form id="cvUploadForm">
+            <label>
+              Arquivo PDF ou TXT
+              <input name="cv" type="file" accept=".pdf,.txt,text/plain,application/pdf" required />
+            </label>
+            <button type="submit">Avaliar CV</button>
+          </form>
+          <div id="cvDraft" class="stack"></div>
+        </section>
+      </section>
+
+      <section class="grid two-columns">
+        <section class="panel">
           <h2>Buscar vagas</h2>
           <form id="searchForm">
             <label>
@@ -74,9 +88,7 @@
           </form>
           <div id="searchLinks" class="stack"></div>
         </section>
-      </section>
 
-      <section class="grid two-columns">
         <section class="panel">
           <h2>Importar vaga</h2>
           <form id="importForm">
@@ -116,8 +128,15 @@
         <section class="panel">
           <div class="panel-header">
             <h2>Ranking</h2>
-            <button id="recommendButton" type="button">Ver recomendacoes</button>
+            <div class="button-row">
+              <button id="discoverButton" class="secondary" type="button">Procurar recentes</button>
+              <button id="recommendButton" type="button">Ver salvas</button>
+            </div>
           </div>
+          <label>
+            Importar automaticamente as melhores
+            <input id="saveTopInput" min="0" max="10" type="number" value="3" />
+          </label>
           <div id="recommendations" class="stack"></div>
         </section>
 
