@@ -14,8 +14,8 @@ def analyze_match(profile: UserProfile, job: JobPosting) -> MatchResult:
     missing_required = sorted(required - profile_skills)
     matched_desired = sorted(desired & profile_skills)
 
-    required_score = 70 if not required else round(70 * len(matched_required) / len(required))
-    desired_score = 20 if not desired else round(20 * len(matched_desired) / len(desired))
+    required_score = 40 if not required else round(70 * len(matched_required) / len(required))
+    desired_score = 10 if not desired else round(20 * len(matched_desired) / len(desired))
     mode_score = 10 if not job.work_mode or job.work_mode in profile.preferred_work_modes else 0
     score = min(100, required_score + desired_score + mode_score)
 
@@ -46,4 +46,3 @@ def analyze_match(profile: UserProfile, job: JobPosting) -> MatchResult:
         weak_points=weak_points,
         recommendation=recommendation,
     )
-

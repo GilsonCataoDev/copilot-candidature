@@ -28,7 +28,7 @@ O retorno traz uma lista de URLs prontas para abrir no navegador.
 
 ## Descoberta automatica controlada
 
-O sistema tambem consegue buscar vagas recentes na API publica da Remotive, comparar com um perfil salvo e listar as melhores oportunidades.
+O sistema busca vagas recentes em fontes automatizadas permitidas, compara com um perfil salvo e lista as melhores oportunidades.
 
 Endpoint:
 
@@ -44,6 +44,19 @@ Parametros uteis:
 - `save_top`: quantidade de vagas melhores que devem ser salvas automaticamente no banco.
 
 A Remotive orienta evitar chamadas frequentes demais; para este MVP, use a busca algumas vezes por dia e sempre mantenha o link de origem para a vaga.
+
+### Google
+
+Busca automatica no Google deve usar API oficial. Configure:
+
+```env
+GOOGLE_API_KEY=sua-chave
+GOOGLE_SEARCH_ENGINE_ID=seu-cx
+```
+
+Com essas variaveis, o backend consulta `https://www.googleapis.com/customsearch/v1` usando `key`, `cx` e `q`. Sem credenciais, o Google fica desativado e o app nao tenta contornar captcha, login, limites ou termos de uso.
+
+Observacao: a documentacao atual do Google informa que a Custom Search JSON API exige API key e Programmable Search Engine ID, e tambem indica que o produto esta fechado para novos clientes. Quem nao tiver acesso deve usar outra fonte/API oficial.
 
 ## Nivel 2 - Importacao guiada
 

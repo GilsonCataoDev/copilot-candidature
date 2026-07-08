@@ -1,4 +1,4 @@
-from app.job_discovery import discover_remotive_jobs
+from app.job_discovery import discover_google_jobs, discover_jobs, discover_remotive_jobs
 from app.models import UserProfile, WorkMode
 
 
@@ -40,4 +40,39 @@ def test_discover_remotive_jobs_ranks_recent_matches(monkeypatch) -> None:
 
     assert len(jobs) == 1
     assert jobs[0].source == "remotive"
-    assert jobs[0].match.score == 100
+    assert jobs[0].match.score == 90
+
+
+def test_discover_google_jobs_uses_official_search_results(monkeypatch) -> None:
+    def fake_google_fetch(query: str, limit: int, api_key: str, search_engine_id: str) -> list[dict]:
+        return [
+            {
+                "title": "Estagio Python - Acme",
+                "displayLink": "jobs.example.com",
+                "link": "https://jobs.example.com/estagio-python",
+                "snippet": "Vaga remota com Python, SQL e FastAPI.",
+            }
+        ]
+
+    monkeypatch.setattr("app.job_discovery.fetch_google_jobs", fake_google_fetch)
+    profile = UserProfile(
+        full_name="Ana Silva",
+        email="ana@example.com",
+        skills=["Python", "FastAPI", "SQL"],
+        target_roles=["Estagio Python"],
+    )
+
+    jobs = discover_google_jobs(profile, api_key="key", search_engine_id="cx", minimum_score=30)
+
+    assert len(jobs) == 1
+    assert jobs[0].source == "google"
+    assert jobs[0].job.required_skills == ["Python", "FastAPI", "SQL"]
+
+
+def test_discover_jobs_combines_sources(monkeypatch) -> None:
+    monkeypatch.setattr("app.job_discovery.fetch_remotive_jobs", lambda *args, **kwargs: [])
+
+    profile = UserProfile(full_name="Ana Silva", email="ana@example.com", skills=["Python"])
+    jobs = discover_jobs(profile, google_api_key=None, google_search_engine_id=None)
+
+    assert jobs == []

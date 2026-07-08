@@ -19,6 +19,7 @@
 
 - Gerar links de busca por cargo, localidade, modalidade e skills. Concluido na base inicial.
 - Buscar vagas recentes por API publica e ranquear por perfil. Base iniciada com Remotive.
+- Buscar vagas via Google oficial quando API key e Search Engine ID estiverem configurados. Base iniciada.
 - Importar rascunho de vaga por URL/HTML para revisao humana. Concluido na base inicial.
 - Salvar vagas analisadas. Concluido na base inicial.
 - Salvar perfis, candidaturas e PDFs gerados. Concluido na base inicial.

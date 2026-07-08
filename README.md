@@ -58,12 +58,24 @@ O painel em `/` permite:
 - cadastrar perfil;
 - importar perfil a partir de CV PDF/TXT;
 - gerar links de busca;
-- procurar vagas recentes na Remotive;
+- procurar vagas recentes automaticamente;
+- usar Google Programmable Search quando `GOOGLE_API_KEY` e `GOOGLE_SEARCH_ENGINE_ID` estiverem configurados;
 - importar rascunho de vaga;
 - salvar vagas;
 - ver ranking por perfil;
 - criar candidatura com CV PDF;
 - aprovar candidatura.
+
+## Google Search
+
+Para buscar vagas pelo Google de forma automatizada, configure a API oficial:
+
+```env
+GOOGLE_API_KEY=sua-chave
+GOOGLE_SEARCH_ENGINE_ID=seu-cx
+```
+
+Sem essas variaveis, o app continua usando fontes publicas disponiveis, como Remotive, e nao tenta fazer scraping do Google.
 
 ## Testes
 

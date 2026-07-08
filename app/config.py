@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     app_env: str = "development"
     storage_dir: Path = Path("storage")
     database_path: Path = Path("storage/app.db")
+    google_api_key: str | None = None
+    google_search_engine_id: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -125,6 +125,40 @@ function renderApplications() {
   });
 }
 
+function renderDiscoveredJobs(result) {
+  const target = document.querySelector("#recommendations");
+  if (!result.jobs.length) {
+    target.innerHTML = '<p class="meta">Nenhuma vaga recente compativel encontrada.</p>';
+    return;
+  }
+
+  target.innerHTML = result.jobs
+    .map(
+      (item) => `
+        <article class="card">
+          <h3>${item.job.title}</h3>
+          <p class="meta">${item.job.company} - ${item.job.location || "Local nao informado"}</p>
+          <p><span class="score">${item.match.score}% match</span> Fonte: ${item.source}</p>
+          <p class="meta">Publicado: ${item.published_at || "nao informado"}</p>
+          <p class="meta">${item.match.recommendation}</p>
+          <a href="${item.job.url}" target="_blank" rel="noreferrer">Abrir vaga original</a>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+async function runDiscovery(profileId, saveTop = 5) {
+  setStatus("Procurando vagas recentes e calculando compatibilidade...");
+  const result = await api(
+    `/profiles/${profileId}/discover-jobs?limit_per_term=10&max_age_days=30&minimum_score=35&save_top=${saveTop}`,
+    { method: "POST" },
+  );
+  renderDiscoveredJobs(result);
+  await loadData();
+  setStatus(`${result.jobs.length} vagas encontradas. ${result.imported_count} importadas.`);
+}
+
 async function loadData() {
   const [profiles, jobs, applications] = await Promise.all([
     api("/profiles"),
@@ -153,10 +187,10 @@ document.querySelector("#profileForm").addEventListener("submit", async (event) 
     preferred_work_modes: selectedValues(form, "preferred_work_modes"),
   };
 
-  await api("/profiles", { method: "POST", body: JSON.stringify(profile) });
+  const savedProfile = await api("/profiles", { method: "POST", body: JSON.stringify(profile) });
   form.reset();
-  setStatus("Perfil salvo.");
   await loadData();
+  await runDiscovery(savedProfile.id);
 });
 
 document.querySelector("#cvUploadForm").addEventListener("submit", async (event) => {
@@ -182,9 +216,12 @@ document.querySelector("#cvUploadForm").addEventListener("submit", async (event)
   `;
 
   document.querySelector("#saveCvProfile").addEventListener("click", async () => {
-    await api("/profiles", { method: "POST", body: JSON.stringify(draft.profile) });
-    setStatus("Perfil importado do CV.");
+    const savedProfile = await api("/profiles", {
+      method: "POST",
+      body: JSON.stringify(draft.profile),
+    });
     await loadData();
+    await runDiscovery(savedProfile.id);
   });
 });
 
@@ -305,7 +342,7 @@ document.querySelector("#discoverButton").addEventListener("click", async () => 
   }
 
   const saveTop = Number(document.querySelector("#saveTopInput").value || 0);
-  setStatus("Procurando vagas recentes na Remotive...");
+  setStatus("Procurando vagas recentes nas fontes disponiveis...");
   const result = await api(
     `/profiles/${profileId}/discover-jobs?limit_per_term=10&max_age_days=14&minimum_score=40&save_top=${saveTop}`,
     { method: "POST" },
@@ -326,7 +363,7 @@ document.querySelector("#discoverButton").addEventListener("click", async () => 
           <p class="meta">${item.job.company} - ${item.job.location || "Remote"}</p>
           <p><span class="score">${item.match.score}% match</span> Fonte: ${item.source}</p>
           <p class="meta">Publicado: ${item.published_at || "nao informado"}</p>
-          <a href="${item.job.url}" target="_blank" rel="noreferrer">Abrir vaga na Remotive</a>
+          <a href="${item.job.url}" target="_blank" rel="noreferrer">Abrir vaga original</a>
         </article>
       `,
     )

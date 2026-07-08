@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.cv_import import build_profile_draft_from_cv
 from app.cv_pdf import generate_cv_pdf
 from app.database import Database
-from app.job_discovery import discover_remotive_jobs
+from app.job_discovery import discover_jobs
 from app.job_import import import_job_draft
 from app.job_search import build_search_plan
 from app.matching import analyze_match
@@ -171,8 +171,10 @@ def discover_jobs_for_profile(
     if stored_profile is None:
         raise HTTPException(status_code=404, detail="Profile not found")
 
-    discovered_jobs = discover_remotive_jobs(
+    discovered_jobs = discover_jobs(
         stored_profile.profile,
+        google_api_key=settings.google_api_key,
+        google_search_engine_id=settings.google_search_engine_id,
         limit_per_term=limit_per_term,
         max_age_days=max_age_days,
         minimum_score=minimum_score,
@@ -185,7 +187,11 @@ def discover_jobs_for_profile(
 
     return JobDiscoveryResponse(
         profile_id=profile_id,
-        source="remotive",
+        source=(
+            "remotive+google"
+            if settings.google_api_key and settings.google_search_engine_id
+            else "remotive"
+        ),
         imported_count=imported_count,
         jobs=discovered_jobs,
     )
